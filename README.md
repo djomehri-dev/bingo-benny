@@ -31,7 +31,21 @@ python3 -m http.server 8000
 # open http://localhost:8000
 ```
 
-## How it plays
+## Modes
+
+| | 😺 Easy | 🧠 Genius |
+|---|---|---|
+| Riddles | Simple sums: 6 + 4, 12 − 3, 3 × 5 | Primes, squares, Fibonacci, dice, coins and combinations |
+| "On your card?" hint | Yes | No |
+| Time per ball | 10s | 6.5s |
+| Schrödinger boxes | None | 4 per card |
+| Odds meter | Hidden | Shown |
+| Rivals | Slower (you win about half the time) | Faster |
+| Coins | ×1 | ×2 |
+
+In both modes, the answer to each riddle is shown when the next ball is called: whether it was on your card, whether you daubed it, or whether you missed it. The history balls are coloured to match (grey: not on your card, green: daubed, red: missed). The last riddle's answer is shown when the round ends.
+
+## How Genius mode plays
 
 Benny is drawn as an SVG in `index.html`, based on the photos above.
 

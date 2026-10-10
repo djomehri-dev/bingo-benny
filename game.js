@@ -3,14 +3,34 @@
 
   const COLS = ['B', 'I', 'N', 'G', 'O'];
   const FREE = 12;
-  const CALL_MS = 6500;
   const RIVALS = 3;
-  const BOXES = 4;
   const BOOST_BALLS = 5;
-  const FREEZE_MS = 2000;
   const BASE_REWARD = 100;
   const LUCKY_BOX_BONUS = 25;
   const SAVE_KEY = 'bingo-benny';
+
+  const MODES = {
+    easy: {
+      label: 'Easy',
+      callMs: 10000,
+      boxes: 0,
+      rivalDelay: 8, // rivals call BINGO 8-10 balls after completing a line
+      freezeMs: 1000,
+      hint: true, // tell the player whether the current answer is on their card
+      odds: false,
+      rewardMult: 1,
+    },
+    genius: {
+      label: 'Genius',
+      callMs: 6500,
+      boxes: 4,
+      rivalDelay: 4, // 4-6 balls
+      freezeMs: 2000,
+      hint: false,
+      odds: true,
+      rewardMult: 2,
+    },
+  };
 
   const MOUTHS = {
     happy: 'M44 67 Q47 70.5 50 67 Q53 70.5 56 67',
@@ -21,9 +41,11 @@
   const $ = id => document.getElementById(id);
 
   // ---------- Persistence ----------
-  const save = Object.assign({ coins: 0, played: 0, wins: 0 }, (() => {
+  const save = Object.assign({ coins: 0, played: 0, wins: 0, mode: 'easy' }, (() => {
     try { return JSON.parse(localStorage.getItem(SAVE_KEY)) || {}; } catch { return {}; }
   })());
+  if (!MODES[save.mode]) save.mode = 'easy';
+  let mode = MODES[save.mode];
   function persist() {
     try { localStorage.setItem(SAVE_KEY, JSON.stringify(save)); } catch { /* storage unavailable */ }
   }
@@ -115,7 +137,20 @@
     return out;
   }
 
+  // Easy mode: plain addition, subtraction, small times tables.
+  function easyRiddles(n) {
+    const out = [];
+    if (n >= 2) { const a = 1 + randInt(Math.min(n - 1, 10)); out.push(`${n - a} + ${a}`); }
+    const b = 1 + randInt(9);
+    out.push(`${n + b} − ${b}`);
+    const factors = range(2, 10).filter(d => n % d === 0 && n / d >= 2 && n / d <= 10);
+    if (factors.length) { const d = pick(factors); out.push(`${d} × ${n / d}`); }
+    if (n % 2 === 0 && n <= 40) out.push(`Double ${n / 2}`);
+    return out;
+  }
+
   function riddleFor(n) {
+    if (mode === MODES.easy) return pick(easyRiddles(n));
     const special = SPECIAL[n];
     if (special && Math.random() < 0.6) return pick(special);
     return pick(genericRiddles(n));
@@ -131,7 +166,7 @@
 
     if (withBoxes) {
       const spare = cols.map(() => 5); // next unused number per column
-      const spots = shuffle(range(0, 24).filter(i => i !== FREE)).slice(0, BOXES);
+      const spots = shuffle(range(0, 24).filter(i => i !== FREE)).slice(0, mode.boxes);
       for (const i of spots) {
         const c = i % 5;
         const pair = [cells[i].n, cols[c][spare[c]++]].sort((x, y) => x - y);
@@ -218,9 +253,18 @@
     $('stats').textContent = save.played ? `Games: ${save.played} · Wins: ${save.wins}` : '';
   }
 
+  // How a called number relates to the player's card:
+  // 'off' (not on it), 'hit' (daubed), 'missed' (on it, not daubed), 'maybe' (in a sealed box).
+  function ballStatus(m) {
+    const cell = round.card.find(c => (c.kind === 'num' && c.n === m) || (c.kind === 'box' && (c.a === m || c.b === m)));
+    if (!cell) return 'off';
+    if (cell.kind === 'box') return 'maybe';
+    return cell.marked ? 'hit' : 'missed';
+  }
+
   function ballEl(n) {
     const el = document.createElement('div');
-    el.className = 'ball';
+    el.className = `ball ${ballStatus(n)}`;
     el.dataset.col = colOf(n);
     el.textContent = `${colOf(n)}${n}`;
     return el;
@@ -295,13 +339,49 @@
       clue.appendChild(ans);
     }
 
+    $('balls-called').textContent = `${round.calledOrder.length} / 75`;
+    renderAnswers();
+  }
+
+  // Everything about revealed answers: history colours, last-answer feedback, easy-mode hint.
+  function renderAnswers() {
     const history = $('history');
     history.innerHTML = '';
     round.calledOrder.slice(-6, -1).reverse().forEach(m => history.appendChild(ballEl(m)));
-    $('balls-called').textContent = `${round.calledOrder.length} / 75`;
+
+    const feedback = $('feedback');
+    const last = round.calledOrder[round.calledOrder.length - 2];
+    if (last === undefined) {
+      feedback.className = 'feedback hidden';
+    } else {
+      const status = ballStatus(last);
+      const name = `${colOf(last)}${last}`;
+      feedback.className = `feedback ${status}`;
+      feedback.textContent = {
+        off: `Last answer: ${name}. Not on your card.`,
+        hit: `Last answer: ${name}. On your card ✓`,
+        missed: `Last answer: ${name}. It's on your card! Daub it now.`,
+        maybe: `Last answer: ${name}. It's one of the numbers in a Schrödinger box!`,
+      }[status];
+    }
+
+    const hint = $('hint');
+    hint.classList.toggle('hidden', !mode.hint);
+    if (mode.hint) {
+      const status = ballStatus(round.calledOrder[round.calledOrder.length - 1]);
+      hint.className = `hint ${status}`;
+      hint.textContent = {
+        off: "Not on your card. Relax until the next one.",
+        hit: '✓ Daubed!',
+        missed: "🐾 It's on your card! Find it.",
+        maybe: '🐾 It might be in a box!',
+      }[status];
+    }
   }
 
   function renderOdds() {
+    $('odds').classList.toggle('hidden', !mode.odds);
+    if (!mode.odds) return;
     const p = nextBallOdds();
     $('odds').textContent = `🎲 Chance the next ball gives you BINGO: ${(p * 100).toFixed(1)}%`
       + ` (${(p * round.deck.length).toFixed(1)} of ${round.deck.length} balls)`;
@@ -311,7 +391,7 @@
     const bar = $('timer-bar');
     bar.style.animation = 'none';
     void bar.offsetWidth;
-    bar.style.animation = `drain ${CALL_MS}ms linear forwards`;
+    bar.style.animation = `drain ${mode.callMs}ms linear forwards`;
   }
 
   function refreshBingoButton() {
@@ -335,7 +415,7 @@
         nums: makeCard(false).map(c => c.n ?? 0),
         marked: new Set([FREE]),
         bingoAt: null,
-        reaction: 4 + randInt(3), // rivals call 4-6 balls after completing a line
+        reaction: mode.rivalDelay + randInt(3),
       })),
       timer: null,
       over: false,
@@ -354,7 +434,9 @@
     $('btn-boost').disabled = false;
 
     show('screen-game');
-    say('Solve each riddle, then daub the answer. Mind the boxes!');
+    say(mode.boxes
+      ? 'Genius mode! Solve each riddle, then daub the answer. Mind the boxes!'
+      : "Solve each sum, then daub the answer. I'll tell you if it's on your card!");
     callNext();
     resume();
   }
@@ -368,7 +450,7 @@
   function resume() {
     if (!round || round.over) return;
     clearInterval(round.timer);
-    round.timer = setInterval(callNext, CALL_MS);
+    round.timer = setInterval(callNext, mode.callMs);
     restartTimerBar();
   }
 
@@ -418,9 +500,9 @@
   }
 
   function freeze() {
-    round.frozenUntil = Date.now() + FREEZE_MS;
+    round.frozenUntil = Date.now() + mode.freezeMs;
     $('card').classList.add('frozen');
-    setTimeout(() => $('card').classList.remove('frozen'), FREEZE_MS);
+    setTimeout(() => $('card').classList.remove('frozen'), mode.freezeMs);
   }
 
   function tap(i) {
@@ -433,6 +515,7 @@
     if (round.called.has(c.n)) {
       c.marked = true;
       renderCell(i, true);
+      renderAnswers();
       renderOdds();
       refreshBingoButton();
     } else {
@@ -464,6 +547,7 @@
       renderCell(i);
       say(`Empty box… it was ${c.truth} all along. That's probability!`, 'sad');
     }
+    renderAnswers();
     renderOdds();
     refreshBingoButton();
   }
@@ -479,11 +563,12 @@
       save.wins += 1;
       const speed = Math.max(0, 60 - round.calledOrder.length) * 5;
       const boxes = round.luckyBoxes * LUCKY_BOX_BONUS;
-      round.reward = BASE_REWARD + speed + boxes;
+      round.reward = (BASE_REWARD + speed + boxes) * mode.rewardMult;
       save.coins += round.reward;
       title.textContent = 'BINGO! 🎉';
       $('result-text').textContent = `Won in ${round.calledOrder.length} balls. +${round.reward} coins`
-        + (boxes ? ` (incl. ${boxes} for lucky boxes)` : '');
+        + (boxes ? ` (incl. lucky boxes)` : '')
+        + (mode.rewardMult > 1 ? ` (${mode.label} pays ×${mode.rewardMult})` : '');
       double.classList.remove('hidden');
       double.disabled = false;
       say('MEOW! That was purr-fect!', 'excited');
@@ -493,6 +578,12 @@
       double.classList.add('hidden');
       say("Mrrow. We'll get 'em next time!", 'sad');
     }
+
+    const last = round.calledOrder[round.calledOrder.length - 1];
+    $('result-answer').textContent = last === undefined ? ''
+      : `Last riddle: "${round.clue}" = ${colOf(last)}${last}`
+        + (ballStatus(last) === 'off' ? ' (not on your card)' : '');
+    $('result-mode').textContent = `${mode.label} mode`;
 
     persist();
     renderCoins();
@@ -518,7 +609,9 @@
       });
       round.boostLeft = BOOST_BALLS;
       renderCall(); // reveals the current riddle's answer too
-      say(`BENNY BOOST! I peeked in every box and I'll solve the next ${BOOST_BALLS} riddles!`, 'pounce');
+      say(mode.boxes
+        ? `BENNY BOOST! I peeked in every box and I'll solve the next ${BOOST_BALLS} riddles!`
+        : `BENNY BOOST! I pawed your numbers and I'll solve the next ${BOOST_BALLS} sums!`, 'pounce');
       renderOdds();
       refreshBingoButton();
     }
@@ -547,7 +640,26 @@
     startRound();
   }
 
+  function selectMode(key) {
+    mode = MODES[key];
+    save.mode = key;
+    persist();
+    document.querySelectorAll('.mode-picker button').forEach(b => {
+      const active = b.dataset.mode === key;
+      b.classList.toggle('active', active);
+      b.setAttribute('aria-pressed', active);
+    });
+    document.querySelectorAll('.howto').forEach(ul => ul.classList.toggle('hidden', ul.dataset.mode !== key));
+  }
+
   // ---------- Wiring ----------
+  document.querySelectorAll('.mode-picker button').forEach(b => b.addEventListener('click', () => {
+    selectMode(b.dataset.mode);
+    say(b.dataset.mode === 'easy'
+      ? "Easy mode: simple sums, and I'll tell you when the answer is on your card."
+      : 'Genius mode: tough riddles, Schrödinger boxes and live odds. Double coins!', 'excited');
+  }));
+  $('btn-menu').addEventListener('click', () => { show('screen-menu'); say('Pick a mode, then hit Play!'); });
   $('btn-play').addEventListener('click', startRound);
   $('btn-again').addEventListener('click', playAgain);
   $('btn-bingo').addEventListener('click', () => {
@@ -562,5 +674,6 @@
   });
 
   Ads.init();
+  selectMode(save.mode);
   renderCoins();
 })();

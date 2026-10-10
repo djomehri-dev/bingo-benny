@@ -36,8 +36,18 @@
     </section>
 
     <section id="screen-menu" class="screen">
+      <div class="mode-picker" role="group" aria-label="Game mode">
+        <button data-mode="easy" aria-pressed="false">😺 Easy<small>Simple sums</small></button>
+        <button data-mode="genius" aria-pressed="false">🧠 Genius<small>Riddles &amp; odds · 2× coins</small></button>
+      </div>
       <button id="btn-play" class="btn primary big">Play</button>
-      <ul class="howto">
+      <ul class="howto" data-mode="easy">
+        <li>➕ Each ball is a <b>simple sum</b>, like 6 + 4 or 3 × 5. Work it out, then tap that number on your card.</li>
+        <li>🐾 Benny tells you whether the answer is <b>on your card</b>. Most numbers won't be, and that's normal bingo.</li>
+        <li>⏱️ You get 10 seconds per ball, and you can still daub a number after its ball has passed.</li>
+        <li>🏆 Get 5 in a row, column or diagonal and hit <b>BINGO</b> before the 3 rival players.</li>
+      </ul>
+      <ul class="howto hidden" data-mode="genius">
         <li>🧩 Each ball is a <b>riddle</b>. Solve it to find the number, then daub it.</li>
         <li>📦 <b>Schrödinger boxes</b> hold one of two numbers. Open one when one of its numbers is called for a 50/50 shot, or wait for both and it's safe. Open it on the wrong number and the box is empty.</li>
         <li>🎲 Watch the <b>odds meter</b> and beat the 3 rival players to BINGO.</li>
@@ -52,6 +62,7 @@
         <div class="clue-wrap">
           <p class="clue-label">Benny's riddle</p>
           <p id="clue" class="clue">Get ready…</p>
+          <p id="hint" class="hint hidden"></p>
           <div class="timer"><span id="timer-bar"></span></div>
         </div>
       </div>
@@ -59,6 +70,7 @@
         <span class="history-label">Answers</span>
         <div id="history" class="history"></div>
       </div>
+      <p id="feedback" class="feedback hidden" role="status"></p>
       <p id="odds" class="odds">🎲 Chance the next ball gives you BINGO: –</p>
 
       <div class="cat-card">
@@ -84,10 +96,13 @@
     </section>
 
     <section id="screen-result" class="screen hidden">
+      <p id="result-mode" class="stats"></p>
       <h2 id="result-title"></h2>
       <p id="result-text"></p>
+      <p id="result-answer" class="result-answer"></p>
       <button id="btn-double" class="btn">📺 Watch ad to double coins</button>
       <button id="btn-again" class="btn primary big">Play again</button>
+      <button id="btn-menu" class="btn">Change mode</button>
     </section>
   </div>
 
