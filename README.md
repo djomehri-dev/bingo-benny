@@ -1,6 +1,22 @@
 # bingo-benny
 
-A casual bingo game hosted by Benny, a bingo-ball mascot. Plain HTML/CSS/JS, no build step.
+**Bingo Benny** is a casual bingo game for the browser with a twist: every number is called as a riddle, and some squares are Schrödinger boxes that may or may not hold the number you need. Solve the clue, weigh the odds, and call BINGO before the three rival players do.
+
+Your host is Benny, a real long-haired black cat with a smoky brown ruff and yellow-green eyes. He cheers your wins, sulks at your losses, and hisses when you daub a number that hasn't been called.
+
+<p align="center">
+  <img src="assets/benny-portrait.jpg" alt="Benny, a fluffy black cat with a brown ruff and yellow-green eyes, sitting on a patio table" height="360">
+  <img src="assets/benny-lounging.jpg" alt="Benny lying on his side on the carpet, looking up at the camera" height="360">
+</p>
+
+### Why it's different
+
+- **It's a puzzle as well as luck.** Riddles cover arithmetic, primes, squares, Fibonacci numbers, coin and dice probability, and combinations ("ways to pick 2 cats from a group of 8"). You can't daub a number until you've worked it out.
+- **You make probability calls.** Each Schrödinger box is a real decision: open it now for a 50/50 shot, or wait until both of its numbers are called and open it safely. Meanwhile the rivals keep getting closer.
+- **The odds are shown.** A live meter shows your exact chance of getting BINGO on the next ball, so you learn to read the odds as you play.
+- **The card is Benny.** The grid is shaped like his face, with ears, whiskers and his brown ruff, and the daub marks are paw prints.
+
+It runs in any modern browser on desktop or phone. It's plain HTML, CSS and JavaScript, with no build step and no dependencies.
 
 ## Run it
 
@@ -11,7 +27,7 @@ python3 -m http.server 8000
 
 ## How it plays
 
-Benny is a real long-haired black cat (smoky brown ruff, yellow-green eyes), drawn as an SVG in `index.html`. The card is shaped like his face.
+Benny is drawn as an SVG in `index.html`, based on the photos above.
 
 - 5×5 card (B 1–15, I 16–30, N 31–45, G 46–60, O 61–75), free centre.
 - Every 6.5s a ball is called as a **riddle**: arithmetic, primes, squares, Fibonacci, coin/dice probability, combinations ("ways to pick 2 cats from 8"). The column letter is shown; the number is revealed in the answer history when the next ball comes.
