@@ -1,5 +1,7 @@
 # bingo-benny
 
+### 🐾 [Play Bingo Benny in your browser](https://djomehri-dev.github.io/bingo-benny/)
+
 **Bingo Benny** is a casual bingo game for the browser with a twist: every number is called as a riddle, and some squares are Schrödinger boxes that may or may not hold the number you need. Solve the clue, weigh the odds, and call BINGO before the three rival players do.
 
 Your host is Benny, a real long-haired black cat with a smoky brown ruff and yellow-green eyes. He cheers your wins, sulks at your losses, and hisses when you daub a number that hasn't been called.
