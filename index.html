@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Bingo Benny</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="app">
+    <header class="topbar">
+      <div class="logo">Bingo <span>Benny</span></div>
+      <div class="coins" id="coins">🪙 0</div>
+    </header>
+
+    <section class="benny-row">
+      <div id="benny" class="benny" aria-hidden="true">
+        <svg viewBox="0 0 100 100" width="96" height="96">
+          <path class="benny-ruff" d="M16 66 Q10 90 28 97 L72 97 Q90 90 84 66 Q72 86 50 86 Q28 86 16 66Z"/>
+          <path class="benny-fur" d="M18 44 L20 8 L46 26Z"/>
+          <path class="benny-fur" d="M82 44 L80 8 L54 26Z"/>
+          <path class="benny-ear-in" d="M24 32 L25 16 L38 26Z"/>
+          <path class="benny-ear-in" d="M76 32 L75 16 L62 26Z"/>
+          <path class="benny-fur" d="M50 20 C72 20 86 34 86 52 L93 57 L85 61 L90 69 L79 71 C73 80 62 86 50 86 C38 86 27 80 21 71 L10 69 L15 61 L7 57 L14 52 C14 34 28 20 50 20Z"/>
+          <path class="benny-tuft" d="M24 72 L30 64 L33 74 L40 66 L42 78 M76 72 L70 64 L67 74 L60 66 L58 78"/>
+          <ellipse class="benny-eye" cx="37" cy="50" rx="7.5" ry="6.5"/>
+          <ellipse class="benny-eye" cx="63" cy="50" rx="7.5" ry="6.5"/>
+          <ellipse id="benny-pupil-l" class="benny-pupil" cx="37" cy="50" rx="1.8" ry="5.5"/>
+          <ellipse id="benny-pupil-r" class="benny-pupil" cx="63" cy="50" rx="1.8" ry="5.5"/>
+          <path class="benny-nose" d="M46.5 60 L53.5 60 L50 64.5Z"/>
+          <path id="benny-mouth" class="benny-mouth" d="M44 67 Q47 70.5 50 67 Q53 70.5 56 67"/>
+          <path class="benny-whisker" d="M30 62 L4 58 M30 65 L5 66 M70 62 L96 58 M70 65 L95 66"/>
+        </svg>
+      </div>
+      <div id="bubble" class="bubble" role="status">Mrrp! I'm Benny. Can you solve my riddles?</div>
+    </section>
+
+    <section id="screen-menu" class="screen">
+      <button id="btn-play" class="btn primary big">Play</button>
+      <ul class="howto">
+        <li>🧩 Each ball is a <b>riddle</b>. Solve it to find the number, then daub it.</li>
+        <li>📦 <b>Schrödinger boxes</b> hold one of two numbers. Open one when one of its numbers is called for a 50/50 shot, or wait for both and it's safe. Open it on the wrong number and the box is empty.</li>
+        <li>🎲 Watch the <b>odds meter</b> and beat the 3 rival players to BINGO.</li>
+        <li>🙀 Wrong guesses make Benny hiss and freeze your card for a moment.</li>
+      </ul>
+      <p class="stats" id="stats"></p>
+    </section>
+
+    <section id="screen-game" class="screen hidden">
+      <div class="caller">
+        <div id="current-ball" class="ball big">–</div>
+        <div class="clue-wrap">
+          <p class="clue-label">Benny's riddle</p>
+          <p id="clue" class="clue">Get ready…</p>
+          <div class="timer"><span id="timer-bar"></span></div>
+        </div>
+      </div>
+      <div class="history-row">
+        <span class="history-label">Answers</span>
+        <div id="history" class="history"></div>
+      </div>
+      <p id="odds" class="odds">🎲 Chance the next ball gives you BINGO: –</p>
+
+      <div class="cat-card">
+        <span class="ear left"></span>
+        <span class="ear right"></span>
+        <div id="card" class="card"></div>
+        <svg class="cat-snout" viewBox="0 0 60 24" aria-hidden="true">
+          <path d="M25 3 L35 3 L30 9Z" class="snout-nose"/>
+          <path d="M20 13 Q25 19 30 13 Q35 19 40 13" class="snout-mouth"/>
+        </svg>
+        <svg class="whiskers left" viewBox="0 0 60 30" aria-hidden="true"><path d="M60 8 L0 2 M60 15 L0 15 M60 22 L0 28"/></svg>
+        <svg class="whiskers right" viewBox="0 0 60 30" aria-hidden="true"><path d="M0 8 L60 2 M0 15 L60 15 M0 22 L60 28"/></svg>
+      </div>
+
+      <div class="status">
+        <span id="balls-called">0 / 75</span>
+        <span id="rivals">3 rivals playing</span>
+      </div>
+      <div class="actions">
+        <button id="btn-boost" class="btn boost">🐾 Benny Boost <small>(ad)</small></button>
+        <button id="btn-bingo" class="btn bingo" disabled>BINGO!</button>
+      </div>
+    </section>
+
+    <section id="screen-result" class="screen hidden">
+      <h2 id="result-title"></h2>
+      <p id="result-text"></p>
+      <button id="btn-double" class="btn">📺 Watch ad to double coins</button>
+      <button id="btn-again" class="btn primary big">Play again</button>
+    </section>
+  </div>
+
+  <div id="ad-overlay" class="ad-overlay hidden">
+    <div class="ad-box">
+      <p class="ad-label" id="ad-label">Ad</p>
+      <p class="ad-count" id="ad-count">5</p>
+      <p class="ad-note">Placeholder: swap in a real ad SDK in ads.js</p>
+      <button id="ad-skip" class="btn">Skip (no reward)</button>
+    </div>
+  </div>
+
+  <script src="ads.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>
