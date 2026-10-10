@@ -16,6 +16,10 @@ Your host is Benny, a real long-haired black cat with a smoky brown ruff and yel
 - **The odds are shown.** A live meter shows your exact chance of getting BINGO on the next ball, so you learn to read the odds as you play.
 - **The card is Benny.** The grid is shaped like his face, with ears, whiskers and his brown ruff, and the daub marks are paw prints.
 
+<p align="center">
+  <img src="assets/benny-schrodinger.svg" alt="Cartoon of Benny as Schrödinger's cat: awake Benny peeks out of a cardboard box labelled 50% / 50%, next to a dashed, sleeping copy of himself" width="400">
+</p>
+
 It runs in any modern browser on desktop or phone. It's plain HTML, CSS and JavaScript, with no build step and no dependencies.
 
 ## Run it
